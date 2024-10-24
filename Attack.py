@@ -9,35 +9,35 @@ from supremacy import helpers
 CREATOR = "Farmers"
 
 
-def tank_ai(tank, info, game_map):
-    """
-    Function to control tanks.
-    """
-    if not tank.stopped:
-        if tank.stuck:
-            tank.set_heading(np.random.random() * 360.0)
-        elif "target" in info:
-            tank.goto(*info["target"])
+# def tank_ai(tank, info, game_map):
+#     """
+#     Function to control tanks.
+#     """
+#     if not tank.stopped:
+#         if tank.stuck:
+#             tank.set_heading(np.random.random() * 360.0)
+#         elif "target" in info:
+#             tank.goto(*info["target"])
 
 
-def ship_ai(ship, info, game_map):
-    """
-    Function to control ships.
-    """
-    if not ship.stopped:
-        if ship.stuck:
-            if ship.get_distance(ship.owner.x, ship.owner.y) > 20:
-                ship.convert_to_base()
-            else:
-                ship.set_heading(np.random.random() * 360.0)
+# def ship_ai(ship, info, game_map):
+#     """
+#     Function to control ships.
+#     """
+#     if not ship.stopped:
+#         if ship.stuck:
+#             if ship.get_distance(ship.owner.x, ship.owner.y) > 20:
+#                 ship.convert_to_base()
+#             else:
+#                 ship.set_heading(np.random.random() * 360.0)
 
 
-def jet_ai(jet, info, game_map):
-    """
-    Function to control jets.
-    """
-    if "target" in info:
-        jet.goto(*info["target"])
+# def jet_ai(jet, info, game_map):
+#     """
+#     Function to control jets.
+#     """
+#     if "target" in info:
+#         jet.goto(*info["target"])
 
 
 class PlayerAi:
@@ -82,7 +82,6 @@ class PlayerAi:
             else:
                 if self.nships[uid] < 3:
                     if base.crystal > base.cost("ship"):
-                        
                         ship = base.build_ship(heading=360 * np.random.random())
                         self.nships[uid] += 1
                 elif self.ntanks[uid] < 5:
@@ -107,26 +106,53 @@ class PlayerAi:
                                 base_nearby=True
 
                         if not base_nearby:
-                            print("Convert Ship")
+                            #print("Convert Ship")
                             ship.convert_to_base()
                         else:
+                            #print("else")
                             ship.set_heading(np.random.random() * 360.0)
 
 
         # Try to find an enemy target
+        target = None
         # If there are multiple teams in the info, find the first team that is not mine
         if len(info) > 1:
             for name in info:
                 if name != self.team:
                     # Target only bases
-                    if "bases" in info[name]:
-                        # Simply target the first base
-                        t = info[name]["bases"][0]
-                        myinfo["target"] = [t.x, t.y]
-                        break
+                    if "jets" in info[name]:
+                        t = info[name]["jets"][0]
+                        # dist = np.zeros((len("jets")))
+                        # for i,jet in enumerate("jets"):
+                        #     dist[i] = jet.get_distance(base[])
 
+                        # Simply target the first jet
+                        target = [t.x, t.y]
+            
+
+
+        # Iterate through all my tanks
+        if "tanks" in myinfo:
+            for tank in myinfo["tanks"]:
+                if not tank.stopped:
+                    # If the tank position is the same as the previous position,
+                    # set a random heading
+                    if tank.stuck:
+                        tank.set_heading(np.random.random() * 360.0)
+                    # Else, if there is a target, go to the target
+                    elif tank.get_distance(tank.owner.x, tank.owner.y) >= 10:
+                        tank.stop()
+
+        # Iterate through all my jets
+        if "jets" in myinfo:
+            for jet in myinfo["jets"]:
+                # Jets simply go to the target if there is one, they never get stuck
+                if target is not None:
+                    jet.goto(*target)
+
+        
         # Control all my vehicles
-        helpers.control_vehicles(
-            info=myinfo, game_map=game_map, tank=tank_ai, ship=ship_ai, jet=jet_ai
-        )
+        # helpers.control_vehicles(
+        #     info=myinfo, game_map=game_map, tank=tank_ai, ship=ship_ai, jet=jet_ai
+        # )
 
