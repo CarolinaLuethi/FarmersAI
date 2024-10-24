@@ -134,14 +134,19 @@ class PlayerAi:
         # Iterate through all my tanks
         if "tanks" in myinfo:
             for tank in myinfo["tanks"]:
-                if not tank.stopped:
-                    # If the tank position is the same as the previous position,
-                    # set a random heading
-                    if tank.stuck:
-                        tank.set_heading(np.random.random() * 360.0)
-                    # Else, if there is a target, go to the target
-                    elif tank.get_distance(tank.owner.x, tank.owner.y) >= 5:
-                        tank.stop()
+               localtarget = None
+               if len(info) > 1:
+                for name in info:
+                    if name != self.team:
+                        # Target bases in certain distance
+                        if "jets" in info[name]:
+                            t = info[name]["jets"][0]
+                            for jet in info[name]["jets"]:
+                                if tank.get_distance(t.x,t.y) > tank.get_distance(jet.x,jet.y) and tank.get_distance(jet.x,jet.y) < 50:
+                                    t = jet
+                                localtarget = [t.x,t.y]
+                                if localtarget is not None:
+                                    jet.goto(*localtarget)
 
         # # Iterate through all my jets
         # if "jets" in myinfo:
