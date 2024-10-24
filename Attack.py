@@ -6,7 +6,7 @@ import numpy as np
 from supremacy import helpers
 
 # This is your team name
-CREATOR = "Farmers"
+CREATOR = "FarmerAI"
 
 
 # def tank_ai(tank, info, game_map):
@@ -120,8 +120,8 @@ class PlayerAi:
             for name in info:
                 if name != self.team:
                     # Target only bases
-                    if "jets" in info[name]:
-                        t = info[name]["jets"][0]
+                    if "base" in info[name]:
+                        t = info[name]["base"][0]
                         # dist = np.zeros((len("jets")))
                         # for i,jet in enumerate("jets"):
                         #     dist[i] = jet.get_distance(base[])
@@ -160,10 +160,12 @@ class PlayerAi:
                         # Target bases in certain distance
                         if "bases" in info[name]:
                             t = info[name]["bases"][0]
-                            if jet.get_distance(t.x,t.y) < 2000:
+                            for base in info[name]["bases"]:
+                                if jet.get_distance(t.x,t.y) > jet.get_distance(base.x,base.y):
+                                    t = base
                                 localtarget = [t.x,t.y]
                                 if localtarget is not None:
-                                    jet.goto(*target)
+                                    jet.goto(*localtarget)
 
         
         # Control all my vehicles
