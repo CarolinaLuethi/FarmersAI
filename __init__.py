@@ -3,4 +3,4 @@
 from .simple_ai import CREATOR, PlayerAi
 # from .barebones_ai import CREATOR, PlayerAi
 
-__all__ = ["CREATOR", "PlayerAi"]
+__all__ = ["Farmers", "PlayerAi"]

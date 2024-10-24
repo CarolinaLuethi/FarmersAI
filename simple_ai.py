@@ -140,15 +140,30 @@ class PlayerAi:
                     if tank.stuck:
                         tank.set_heading(np.random.random() * 360.0)
                     # Else, if there is a target, go to the target
-                    elif tank.get_distance(tank.owner.x, tank.owner.y) >= 10:
+                    elif tank.get_distance(tank.owner.x, tank.owner.y) >= 5:
                         tank.stop()
+
+        # # Iterate through all my jets
+        # if "jets" in myinfo:
+        #     for jet in myinfo["jets"]:
+        #         # Jets simply go to the target if there is one, they never get stuck
+        #         if target is not None:
+        #             jet.goto(*target)
 
         # Iterate through all my jets
         if "jets" in myinfo:
             for jet in myinfo["jets"]:
-                # Jets simply go to the target if there is one, they never get stuck
-                if target is not None:
-                    jet.goto(*target)
+               localtarget = None
+               if len(info) > 1:
+                for name in info:
+                    if name != self.team:
+                        # Target bases in certain distance
+                        if "bases" in info[name]:
+                            t = info[name]["bases"][0]
+                            if jet.get_distance(t.x,t.y) < 2000:
+                                localtarget = [t.x,t.y]
+                                if localtarget is not None:
+                                    jet.goto(*localtarget)
 
         
         # Control all my vehicles
